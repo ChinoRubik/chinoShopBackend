@@ -4,18 +4,18 @@ const express = require('express')
 const mysql = require('mysql')
 const myConnect = require('express-myconnection')
 const bodyParse = require('body-parser');
+require('dotenv').config()
 
 const db = {
-    host : 'localhost',
-    port : 3306,
-    user : 'root',
-    password : '',
-    database : 'expressdatabase'
+    host : process.env.DB_HOST,
+    port : process.env.DB_PORT || 3306,
+    user : process.env.DB_ROOT || 'root',
+    password : process.env.DB_PASSWORD || '',
+    database : process.env.DB_DATABASE || 'expressdatabase'
 }
 
 const app = express()
 app.use(express.json())
-
 
 //middlewares
 app.use(bodyParse.urlencoded({extended:false}))
@@ -34,9 +34,11 @@ app.use((req, res, next) => {
 });
 
 //routes
-const routes = require('./routes/myRoutes')
-app.use('/api',routes)
+const dashboardsRoutes = require('./routes/dashboard')
+const verificateToken = require('./routes/validate_token')
+const routesAuth = require('./routes/myRoutes')
 
-
+app.use('/api/auth',routesAuth)
+app.use('/api/dashboard',verificateToken,dashboardsRoutes)
 
 module.exports = app;
