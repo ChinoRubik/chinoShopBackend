@@ -109,6 +109,8 @@ const controller = {
                                         
                         var token = jwt.sign({
                             name: rows[0].name,
+                            lastname: rows[0].lastname,
+                            email: rows[0].email,
                             id: rows[0].id
                         }, process.env.TOKEN_SECRET)
 

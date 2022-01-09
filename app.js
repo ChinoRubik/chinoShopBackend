@@ -24,7 +24,7 @@ app.use(bodyParse.json()) //ME CONVIERTE MIS DATOS EN JSON
 //Conexion a la base de datos
 app.use(myConnect(mysql,db,'single'))
 
-//CORS
+// CORS
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Headers', 'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method');
@@ -32,6 +32,23 @@ app.use((req, res, next) => {
     res.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE');
     next();
 });
+const cors = require('cors');
+var corsOptions = {
+    origin: '*', // Reemplazar con dominio
+    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
+app.use(cors(corsOptions));
+
+
+
+// app.use(function (req, res, next) {
+//     //Enabling CORS
+//     res.header("Access-Control-Allow-Origin", "*");
+//     res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
+//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, ccept, x-client-key, x-client-token, x-client-secret, Authorization");
+//       next();
+//     });
+
 
 //routes
 const dashboardsRoutes = require('./routes/dashboard')
