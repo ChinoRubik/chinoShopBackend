@@ -130,6 +130,7 @@ const controller = {
         });
        
     },
+    
     deleteUser: (req, res) => {
         req.getConnection((err, conn) => {
             if (err) return res.status(400).send({
