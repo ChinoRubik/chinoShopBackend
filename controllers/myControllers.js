@@ -3,8 +3,10 @@
 const validator = require('validator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken')
+const uuid = require('uuid');
 
 const controller = {
+    
     test: (req, res) => {
         return res.status(200).send({
             message: 'Hola soy un mensaje de prueba'
@@ -17,7 +19,7 @@ const controller = {
                 message: err
             })
 
-            conn.query("SELECT * FROM usuarios", (err, rows) => {
+            conn.query("SELECT * FROM users", (err, rows) => {
                 if (err) return res.status(400).send(err)
 
                 return res.status(200).send({
@@ -43,7 +45,7 @@ const controller = {
             const email = !validator.isEmpty(params.email) && validator.isEmail(params.email);
             var existEmail = false;
 
-            conn.query('SELECT * FROM usuarios WHERE email = ?', [req.body.email], (err, rows) => {
+            conn.query('SELECT * FROM users WHERE email = ?', [req.body.email], (err, rows) => {
                 if (err) {
                     return res.status(400).send({
                         message: err
@@ -58,7 +60,18 @@ const controller = {
                     const passwordHash = bcrypt.hashSync(req.body.password, 10);
                     req.body.password = passwordHash;
 
-                    conn.query('INSERT INTO usuarios SET ?', [req.body], (err, rows) => {
+                    const obj = {
+                        uuid : uuid.v4(),
+                        name : req.body.name,
+                        lastname : req.body.lastname,
+                        email: req.body.email,  
+                        password : req.body.password,
+                        roll: 'user',
+                        created_at : new Date(),
+                        updated_at : new Date(),
+
+                    }
+                    conn.query('INSERT INTO users SET ?', [obj], (err, rows) => {
                         if (err) return res.status(400).send({
                             message: req.body
                         });
@@ -93,7 +106,7 @@ const controller = {
                 message: 'Hubo un error al tratar de conectar'
             })
 
-            conn.query('SELECT * FROM usuarios WHERE email = ?', [req.body.email], (err,rows) => {
+            conn.query('SELECT * FROM users WHERE email = ?', [req.body.email], (err,rows) => {
                 if (err) return res.status(400).send({message:'Hubo un error en la conexión'})
                 
                 if (rows.length == 0) {
@@ -138,7 +151,7 @@ const controller = {
             })
 
 
-            conn.query("DELETE FROM usuarios WHERE id = ? ", [req.params.id], (err, rows) => {
+            conn.query("DELETE FROM users WHERE uuid = ? ", [req.params.uuid], (err, rows) => {
                 if (err) return res.status(400).send({ message: 'Hubo un problema tratando de eliminar al usuario,', err })
 
                 return res.status(200).send({
@@ -155,7 +168,7 @@ const controller = {
                 message: err
             });
 
-            conn.query("UPDATE usuarios SET ? WHERE id = ?", [req.body, req.params.id], (err, rows) => {
+            conn.query("UPDATE users SET ? WHERE id = ?", [req.body, req.params.id], (err, rows) => {
                 if (err) return res.status(400).send({
                     message: err
                 });
