@@ -1,7 +1,7 @@
 'use strict'
 const fs = require('fs');   
 const uuid = require('uuid');
-
+const path = require('path')
 const controller = {
 
     dashboard : (req, res) => {
@@ -67,7 +67,6 @@ const controller = {
             if (err) return res.status(400).send({
                 message: err
             })
-     
             if(req.files){ 
                 let totalPath = ''
                 for(var i = 0; (i < req.files.image.length) && (req.files.image.length !== undefined)  ; i++) {
@@ -79,7 +78,7 @@ const controller = {
                     if(ext == 'jpg' || ext == 'png' || ext == 'jpeg' || ext =='gif'){
                         if(i === (req.files.image.length - 1)) {
                             totalPath += path
-                            return res.status(200).send({totalPath , extencion: ext });
+                            return res.status(200).send({path: totalPath , extencion: ext });
 
                         } else {
                             totalPath += path+','
@@ -112,6 +111,23 @@ const controller = {
         });
     },
 
+    getImages: (req,res) => {
+
+        const image = req.params.image;
+        const path_file = './uploads/'+image;
+
+        fs.exists(path_file, (exists) => {
+            console.log('enter', exists)
+            if (exists) {
+                return res.sendFile(path.resolve(path_file))
+            } else {
+                return res.status(404).send({
+                    status: 'error',
+                    message: 'La imagen no existe'
+                });
+            }   
+        })
+    },
     addCategory: (req,res) => {
         req.getConnection((err, conn) => {
             if (err) return res.status(400).send({
@@ -160,6 +176,23 @@ const controller = {
                 return res.status(200).send({
                     status: 'ok',
                     message: 'Categoría eliminada',
+                    rows
+                })
+            })
+        })
+    },
+
+    getProducts: (req,res) => {
+        req.getConnection((err, conn) => {
+            if (err) return res.status(400).send({
+                message: err
+            })
+
+            conn.query("SELECT * FROM products", (err, rows) => {
+                if (err) return res.status(400).send(err)
+                
+                return res.status(200).send({
+                    status: 'ok',
                     rows
                 })
             })

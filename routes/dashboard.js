@@ -12,5 +12,7 @@ router.post('/upload-images',dir_uploads , controller.uploadImages);
 router.post('/addcategory', controller.addCategory);
 router.get('/getcategories',controller.getCategories);
 router.delete('/deletecategory',controller.deleteCategory);
+router.get('/getProducts',controller.getProducts);
+router.get('/getImages/:image',controller.getImages);
 
 module.exports = router

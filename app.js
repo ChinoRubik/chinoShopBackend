@@ -20,7 +20,6 @@ app.use(express.json())
 //middlewares
 app.use(bodyParse.urlencoded({extended:false}))
 app.use(bodyParse.json()) //ME CONVIERTE MIS DATOS EN JSON
-
 //Conexion a la base de datos
 app.use(myConnect(mysql,db,'single'))
 
