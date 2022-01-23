@@ -52,9 +52,11 @@ app.use(cors(corsOptions));
 //routes
 const dashboardsRoutes = require('./routes/dashboard')
 const verificateToken = require('./routes/validate_token')
-const routesAuth = require('./routes/myRoutes')
+const authRoutes = require('./routes/authRoutes')
+const userRoutes = require('./routes/userRoutes')
 
-app.use('/api/auth',routesAuth)
+app.use('/api/auth',authRoutes)
 app.use('/api/dashboard',verificateToken,dashboardsRoutes)
+app.use('/api/user', verificateToken, userRoutes)
 
 module.exports = app;

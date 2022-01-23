@@ -4,7 +4,8 @@ const validator = require('validator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken')
 const uuid = require('uuid');
-
+const fs = require('fs')
+const path = require('path')
 const controller = {
     
     test: (req, res) => {
@@ -30,7 +31,6 @@ const controller = {
         })
     },
     
-
     register: (req, res) => {
         req.getConnection((err, conn) => {
             if (err) return res.status(400).send({
@@ -99,47 +99,56 @@ const controller = {
     },
 
     login : (req,res)=> {
-
-
         req.getConnection((err,conn) =>{
             if (err) return res.status(400).send({
                 message: 'Hubo un error al tratar de conectar'
             })
 
-            conn.query('SELECT * FROM users WHERE email = ?', [req.body.email], (err,rows) => {
-                if (err) return res.status(400).send({message:'Hubo un error en la conexión'})
-                
-                if (rows.length == 0) {
-                    return res.status(400).send({
-                        status: 'error',
-                        message: 'Contraseña Incorrecta o Email Incorrecto (email incorrecto)'
-                    }); 
-                }
+            const emailVal = !validator.isEmpty(req.body.email)
+            const passVal = !validator.isEmpty(req.body.password)
 
-                if (rows.length >= 1){
-                    const verified = bcrypt.compareSync(req.body.password, rows[0].password );
-                    if (verified) {
-                                        
-                        var token = jwt.sign({
-                            name: rows[0].name,
-                            lastname: rows[0].lastname,
-                            email: rows[0].email,
-                            id: rows[0].id
-                        }, process.env.TOKEN_SECRET)
-
-                        res.header('auth-token', token).json({
-                            error: null,
-                            data: { token },
-                            message: 'Bienvenido'
-                        });
-                    } else {
+            if(emailVal && passVal) {
+                conn.query('SELECT * FROM users WHERE email = ?', [req.body.email], (err,rows) => {
+                    if (err) return res.status(400).send({message:'Hubo un error en la conexión'})
+                    
+                    if (rows.length == 0) {
                         return res.status(400).send({
-                            status: 'err',
-                            message: 'Contraseña Incorrecta o Email Incorrecto (contraseña incorrecta)'
-                        });
+                            status: 'error',
+                            message: 'Contraseña Incorrecta o Email Incorrecto (email incorrecto)'
+                        }); 
                     }
-                }
-            });
+    
+                    if (rows.length >= 1){
+                        const verified = bcrypt.compareSync(req.body.password, rows[0].password );
+                        if (verified) {
+                                            
+                            var token = jwt.sign({
+                                name: rows[0].name,
+                                lastname: rows[0].lastname,
+                                email: rows[0].email,
+                                uuid: rows[0].uuid,
+                                roll : rows[0].roll,
+                            }, process.env.TOKEN_SECRET)
+    
+                            res.header('auth-token', token).json({
+                                error: null,
+                                data: { token },
+                                message: 'Bienvenido'
+                            });
+                        } else {
+                            return res.status(400).send({
+                                status: 'error',
+                                message: 'Contraseña Incorrecta o Email Incorrecto (contraseña incorrecta)'
+                            });
+                        }
+                    }
+                });
+            } else {
+                return res.status(400).send({
+                    status: 'error',
+                    message: 'Completa los campos'
+                });
+            }
         });
        
     },
@@ -149,6 +158,7 @@ const controller = {
             if (err) return res.status(400).send({
                 message: 'error aqui'
             })
+
 
 
             conn.query("DELETE FROM users WHERE uuid = ? ", [req.params.uuid], (err, rows) => {
@@ -168,18 +178,48 @@ const controller = {
                 message: err
             });
 
-            conn.query("UPDATE users SET ? WHERE id = ?", [req.body, req.params.id], (err, rows) => {
-                if (err) return res.status(400).send({
-                    message: err
-                });
+            const nameVal = !validator.isEmpty(req.body.name)
+            const lastnameVal = !validator.isEmpty(req.body.lastname)
+            // const Val = !validator.isEmpty(req.body.name)
 
-                return res.status(200).send({
-                    status: 'ok',
-                    message: 'Usuario actualizado'
+            if( nameVal && lastnameVal) {
+                conn.query("UPDATE users SET ? WHERE id = ?", [req.body, req.params.id], (err, rows) => {
+                    if (err) return res.status(400).send({
+                        message: err
+                    });
+    
+                    return res.status(200).send({
+                        status: 'ok',
+                        message: 'Usuario actualizado'
+                    });
                 });
-            });
+            } else {
+                return res.status(400).send({
+                    status: 'error',
+                    message: 'completa los campos'
+                });
+            }
+
+           
         });
-    }
+    },
+    
+    getImages: (req,res) => {
+
+        const image = req.params.image;
+        const path_file = './uploads/'+image;
+
+        fs.exists(path_file, (exists) => {
+            if (exists) {
+                return res.sendFile(path.resolve(path_file))
+            } else {
+                return res.status(404).send({
+                    status: 'error',
+                    message: 'La imagen no existe'
+                });
+            }   
+        })
+    },
 
 }
 

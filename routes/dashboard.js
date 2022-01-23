@@ -11,8 +11,11 @@ router.post('/add', controller.addProduct);
 router.post('/upload-images',dir_uploads , controller.uploadImages);
 router.post('/addcategory', controller.addCategory);
 router.get('/getcategories',controller.getCategories);
-router.delete('/deletecategory',controller.deleteCategory);
+router.delete('/deletecategory/:uuid',controller.deleteCategory);
 router.get('/getProducts',controller.getProducts);
-router.get('/getImages/:image',controller.getImages);
+router.get('/detailProduct/:uuid', controller.detailProduct);
+router.post('/addToCart', controller.addToCart);
+router.get('/getCart/:uuid', controller.getCart);
+router.put('/updateCart/:uuid', controller.updateCart);
 
 module.exports = router
