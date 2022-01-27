@@ -54,8 +54,10 @@ const dashboardsRoutes = require('./routes/dashboard')
 const verificateToken = require('./routes/validate_token')
 const authRoutes = require('./routes/authRoutes')
 const userRoutes = require('./routes/userRoutes')
+const productsPublicRoutes = require('./routes/productsPublicRoutes')
 
 app.use('/api/auth',authRoutes)
+app.use('/api/dashboard/public',productsPublicRoutes)
 app.use('/api/dashboard',verificateToken,dashboardsRoutes)
 app.use('/api/user', verificateToken, userRoutes)
 

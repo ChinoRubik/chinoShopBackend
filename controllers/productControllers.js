@@ -29,11 +29,11 @@ const controller = {
             const stockVal =  validator.isNumeric(req.body.stock);
             const imageVal = !validator.isEmpty(req.body.image);
             const categoryVal = !validator.isEmpty(req.body.category_uuid);
-            const isNewVal = validator.isBoolean(req.body.is_new);
+            // const isNewVal = validator.isBoolean(req.body.is_new);
 
             // console.log(priceVal, descriptionVal, nameVal , sizeVal, discountVal ,stockVal ,imageVal ,categoryVal)
 
-            if (priceVal && descriptionVal && nameVal && sizeVal && discountVal && stockVal && imageVal && categoryVal && isNewVal) {
+            if (priceVal && descriptionVal && nameVal && sizeVal && discountVal && stockVal && imageVal && categoryVal) {
                 const obj = {
                     uuid : uuid.v4(),
                     price : req.body.price,
@@ -147,23 +147,6 @@ const controller = {
         });
     },
 
-    getCategories: (req,res) => {
-        req.getConnection((err, conn) => {
-            if (err) return res.status(400).send({
-                message: err
-            })
-
-            conn.query("SELECT * FROM categories", (err, rows) => {
-                if (err) return res.status(400).send(err)
-                
-                return res.status(200).send({
-                    status: 'ok',
-                    rows
-                })
-            })
-        })
-    },
-
     deleteCategory: (req,res) => {
         req.getConnection((err, conn) => {
             if (err) return res.status(400).send({
@@ -181,40 +164,6 @@ const controller = {
         })
     },
 
-    getProducts: (req,res) => {
-        req.getConnection((err, conn) => {
-            if (err) return res.status(400).send({
-                message: err
-            })
-
-            conn.query("SELECT * FROM products", (err, rows) => {
-                if (err) return res.status(400).send(err)
-                
-                return res.status(200).send({
-                    status: 'ok',
-                    rows
-                })
-            })
-        })
-    },
-
-    detailProduct: (req,res) => {
-        req.getConnection((err, conn) => {
-            if (err) return res.status(400).send({
-                message: err
-            })
-
-            conn.query("SELECT * FROM products WHERE uuid = ?", [req.params.uuid], (err, rows) => {
-                if (err) return res.status(400).send(err)
-                
-                return res.status(200).send({
-                    status: 'ok',
-                    rows
-                })
-            })
-        })
-    },
-
     addToCart: (req,res) => {
         req.getConnection((err, conn) => {
             if (err) return res.status(400).send({
@@ -224,7 +173,10 @@ const controller = {
             const obj = {
                 uuid : uuid.v4(),
                 user_uuid: req.body.user_uuid,
-                product_uuid: req.body.product_uuid
+                product_uuid: req.body.product_uuid,
+                size: req.body.size ? req.body.size : 'm',
+                amount: req.body.amount ? req.body.amount : 1 
+
             }
             conn.query("INSERT INTO cart SET ?",[obj],(err,rows) => {
                 if (err) return res.status(400).send({err})
@@ -242,8 +194,7 @@ const controller = {
             if (err) return res.status(400).send({
                 message: err
             });
-            
-            conn.query("SELECT * FROM cart WHERE user_uuid = ?",[req.params.uuid],(err,rows) => {
+            conn.query("SELECT cart.uuid, cart.user_uuid, cart.product_uuid, cart.amount, cart.size, products.category_uuid, products.price, products.description, products.name, products.image, products.is_new, products.discount, products.stock FROM cart INNER JOIN products ON cart.product_uuid = products.uuid WHERE cart.user_uuid = ?",[req.params.uuid],(err,rows) => {
                 if (err) return res.status(400).send({err})
 
                 return res.status(200).send({
@@ -278,6 +229,24 @@ const controller = {
                     message: 'Completa los campos'
                 });
             }
+        });
+    },
+
+    deleteFromCart: (req,res) => {
+        req.getConnection((err, conn) => {
+            if (err) return res.status(400).send({
+                message: err
+            });
+
+            conn.query("DELETE FROM cart WHERE product_uuid = ? AND size = ?",[req.params.product_uuid, req.params.size],(err,rows) => {
+                if (err) return res.status(400).send({err})
+
+                return res.status(200).send({
+                    status: 'ok',
+                    rows
+                });
+            });
+
         });
     }
 }
