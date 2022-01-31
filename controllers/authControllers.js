@@ -114,7 +114,7 @@ const controller = {
                     if (rows.length == 0) {
                         return res.status(400).send({
                             status: 'error',
-                            message: 'Contraseña Incorrecta o Email Incorrecto (email incorrecto)'
+                            message: 'Contraseña Incorrecta o Email Incorrecto'
                         }); 
                     }
     
@@ -138,7 +138,7 @@ const controller = {
                         } else {
                             return res.status(400).send({
                                 status: 'error',
-                                message: 'Contraseña Incorrecta o Email Incorrecto (contraseña incorrecta)'
+                                message: 'Contraseña Incorrecta o Email Incorrecto'
                             });
                         }
                     }

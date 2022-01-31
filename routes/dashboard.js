@@ -15,5 +15,10 @@ router.post('/addToCart', controller.addToCart);
 router.get('/getCart/:uuid', controller.getCart);
 router.put('/updateCart/:uuid', controller.updateCart);
 router.delete('/deleteFromCart/:product_uuid/:size', controller.deleteFromCart);
+router.delete('/deleteProduct/:uuid', controller.deleteProduct);
+router.post('/addSize', controller.addSize);
+router.get('/getSizes', controller.getSizes);
+router.delete('/deleteSize', controller.deleteSize);
+router.put('/updateProduct/:uuid',controller.updateProduct);
 
 module.exports = router

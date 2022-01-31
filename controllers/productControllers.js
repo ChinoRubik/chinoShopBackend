@@ -26,14 +26,14 @@ const controller = {
             const nameVal = !validator.isEmpty(req.body.name);
             const sizeVal = !validator.isEmpty(req.body.size);
             const discountVal = validator.isNumeric(req.body.discount);
-            const stockVal =  validator.isNumeric(req.body.stock);
+            const stockVal =  validator.isEmpty(req.body.stock);
             const imageVal = !validator.isEmpty(req.body.image);
             const categoryVal = !validator.isEmpty(req.body.category_uuid);
             // const isNewVal = validator.isBoolean(req.body.is_new);
 
             // console.log(priceVal, descriptionVal, nameVal , sizeVal, discountVal ,stockVal ,imageVal ,categoryVal)
 
-            if (priceVal && descriptionVal && nameVal && sizeVal && discountVal && stockVal && imageVal && categoryVal) {
+            if (priceVal && descriptionVal && nameVal && sizeVal && discountVal && imageVal && categoryVal) {
                 const obj = {
                     uuid : uuid.v4(),
                     price : req.body.price,
@@ -54,6 +54,48 @@ const controller = {
                     return res.status(200).send({
                         status: 'ok',
                         message: 'Added sucesfully',
+                        rows
+                    });
+                }); 
+            } else {
+                return res.status(400).send({
+                    status: 'error',
+                    message: 'Completa bien los campos',
+                    
+                });
+            }
+ 
+        })
+    },
+
+    updateProduct: (req,res) => {
+        req.getConnection((err, conn) => {
+            if (err) return res.status(400).send({
+                message: err
+            });
+
+            // const priceVal = req.body.price !== undefined ? validator.isNumeric(req.body.price) : true;
+            // const descriptionVal = req.body.description !== undefined ? !validator.isEmpty(req.body.description) : true;
+            // const nameVal = req.body.name !== undefined ? !validator.isEmpty(req.body.name) : true;
+            // const sizeVal = req.body.size !== undefined ? !validator.isEmpty(req.body.size) : true;
+            // const discountVal = req.body.discount !== undefined ? validator.isNumeric(req.body.discount) : true;
+            // const stockVal = req.body.stock !== undefined ? validator.isEmpty(req.body.stock) : true;
+            // const imageVal = req.body.image !== undefined ? !validator.isEmpty(req.body.image) : true;
+            // const categoryVal = req.body.category_uuid !== undefined ? !validator.isEmpty(req.body.category_uuid) : true;
+            // const isNewVal = validator.isBoolean(req.body.is_new);
+
+            // console.log(priceVal, descriptionVal, nameVal , sizeVal, discountVal ,stockVal ,imageVal ,categoryVal)
+
+            if (true) {
+
+                conn.query('UPDATE products SET ? WHERE uuid = ?', [req.body, req.params.uuid], (err, rows) => {
+                    if (err) return res.status(400).send({
+                        message: err
+                    });
+    
+                    return res.status(200).send({
+                        status: 'ok',
+                        message: 'Updated sucesfully',
                         rows
                     });
                 }); 
@@ -147,6 +189,69 @@ const controller = {
         });
     },
 
+    addSize: (req,res) => {
+        req.getConnection((err, conn) => {
+            if (err) return res.status(400).send({
+                message: err
+            });
+            
+            const sizeVal = !validator.isEmpty(req.body.size)
+
+            if(sizeVal) {
+                const obj = {
+                    uuid : uuid.v4(),
+                    size : req.body.size
+                }
+                conn.query("INSERT INTO sizes SET ?",[obj],(err,rows) => {
+                    if (err) return res.status(400).send({err})
+    
+                    return res.status(200).send({
+                        status: 'ok',
+                        rows
+                    });
+                });
+            } else {
+                return res.status(200).send({
+                    status: 'error',
+                    message: 'Completa los campos'
+                });
+            }            
+        });
+    },
+
+    deleteSize: (req,res) => {
+        req.getConnection((err, conn) => {
+            if (err) return res.status(400).send({
+                message: 'error aqui'
+            })
+            conn.query("DELETE FROM sizes WHERE uuid = ? ", [req.params.uuid], (err, rows) => {
+                if (err) return res.status(400).send({ message: 'Hubo un problema tratando de eliminar la talla,', err })
+
+                return res.status(200).send({
+                    status: 'ok',
+                    message: 'Talla eliminada',
+                    rows
+                })
+            })
+        })
+    },
+
+    getSizes: (req,res) => {
+        req.getConnection((err, conn) => {
+            if (err) return res.status(400).send({
+                message: err
+            });
+            conn.query("SELECT * FROM sizes",[req.params.uuid],(err,rows) => {
+                if (err) return res.status(400).send({err})
+
+                return res.status(200).send({
+                    status: 'ok',
+                    rows
+                });
+            });
+        });
+    },
+
     deleteCategory: (req,res) => {
         req.getConnection((err, conn) => {
             if (err) return res.status(400).send({
@@ -162,6 +267,34 @@ const controller = {
                 })
             })
         })
+    },
+
+    deleteProduct: (req,res) => {
+        req.getConnection((err, conn) => {
+            if (err) return res.status(400).send({
+                message: err
+            });
+            
+            conn.query("SELECT * FROM products WHERE uuid = ?",[req.params.uuid],(err,rows) => {
+                if (err) return res.status(400).send({err})
+                
+                fs.unlink(`uploads/${rows[0].image}`,(err)=>{ 
+                    if(err) {
+                        console.log(err)
+                    }
+                })
+            })
+
+            conn.query("DELETE FROM products WHERE uuid = ?",[req.params.uuid],(err,rows) => {
+                if (err) return res.status(400).send({err})
+                
+                return res.status(200).send({
+                    status: 'ok',
+                    rows
+                });
+            });
+
+        });
     },
 
     addToCart: (req,res) => {
