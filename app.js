@@ -7,11 +7,11 @@ const bodyParse = require('body-parser');
 require('dotenv').config()
 
 const db = {
-    host : process.env.DB_HOST,
+    host : process.env.DB_HOST || 'us-cdbr-east-05.cleardb.net',
     port : process.env.DB_PORT || 3306,
-    user : process.env.DB_ROOT || 'root',
-    password : process.env.DB_PASSWORD || '',
-    database : process.env.DB_DATABASE || 'expressdatabase'
+    user : process.env.DB_ROOT || 'b93cb42c84e304',
+    password : process.env.DB_PASSWORD || 'f31036ae',
+    database : process.env.DB_DATABASE || 'heroku_e336296c02804a2'
 }
 
 const app = express()
