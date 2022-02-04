@@ -12,7 +12,7 @@ const db = {
     password : 'f31036ae',
     database : 'heroku_e336296c02804a2'
 }
-
+//lol
 //b93cb42c84e304:f31036ae@us-cdbr-east-05.cleardb.net/heroku_e336296c02804a2?reconnect=true
 
 const app = express()
