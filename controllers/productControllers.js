@@ -320,22 +320,25 @@ const controller = {
                 message: err
             });
             
-            conn.query("SELECT * FROM products WHERE uuid = ?",[req.params.uuid],(err,rows) => {
+            conn.query("SELECT * FROM images WHERE product_uuid = ?",[req.params.uuid],(err,rows) => {
                 if (err) return res.status(400).send({err})
                 
-                fs.unlink(`uploads/${rows[0].image}`,(err)=>{ 
-                    if(err) {
-                        console.log(err)
-                    }
+               rows.map((item) => {
+                    const deleter = async (path) => await cloudinary.delete(path);
+                    const del = deleter(`Images/${item.uuid}`);                    
                 })
             })
+
+
+            conn.query("DELETE FROM images WHERE product_uuid = ?",[req.params.uuid],(err,rows) => {
+                if (err) return res.status(400).send({err})
+            });
 
             conn.query("DELETE FROM products WHERE uuid = ?",[req.params.uuid],(err,rows) => {
                 if (err) return res.status(400).send({err})
                 
                 return res.status(200).send({
                     status: 'ok',
-                    rows
                 });
             });
 
