@@ -2,6 +2,7 @@
 const fs = require('fs');   
 const uuid = require('uuid');
 const validator = require('validator')
+const cloudinary = require('../cloudinary/cloudinary');
 
 const controller = {
 
@@ -20,20 +21,31 @@ const controller = {
             if (err) return res.status(400).send({
                 message: err
             });
-
             const priceVal = validator.isNumeric(req.body.price);
             const descriptionVal = !validator.isEmpty(req.body.description);
             const nameVal = !validator.isEmpty(req.body.name);
             const sizeVal = !validator.isEmpty(req.body.size);
             const discountVal = validator.isNumeric(req.body.discount);
             const stockVal =  validator.isEmpty(req.body.stock);
-            const imageVal = !validator.isEmpty(req.body.image);
             const categoryVal = !validator.isEmpty(req.body.category_uuid);
-            // const isNewVal = validator.isBoolean(req.body.is_new);
 
             // console.log(priceVal, descriptionVal, nameVal , sizeVal, discountVal ,stockVal ,imageVal ,categoryVal)
 
-            if (priceVal && descriptionVal && nameVal && sizeVal && discountVal && imageVal && categoryVal) {
+            if (priceVal && descriptionVal && nameVal && sizeVal && discountVal && categoryVal) {
+
+                const uploadImage = async (req) => {
+                    const uploader = async (path) => await cloudinary.uploads(path, 'Images');
+                        const urls = [];
+                        const files = req.files;
+                        for(const file of files) {
+                            const {path} = file;
+                            const newPath = await uploader(path)
+                            urls.push(newPath);
+                            fs.unlinkSync(path)
+                        }
+                        return urls
+                }
+
                 const obj = {
                     uuid : uuid.v4(),
                     price : req.body.price,
@@ -43,19 +55,48 @@ const controller = {
                     is_new : req.body.is_new,
                     discount : req.body.discount,
                     stock : req.body.stock,
-                    image : req.body.image,
+                    image: '',
                     category_uuid : req.body.category_uuid
                 }
+
                 conn.query('INSERT INTO products SET ?', [obj], (err, rows) => {
                     if (err) return res.status(400).send({
                         message: err
                     });
     
-                    return res.status(200).send({
-                        status: 'ok',
-                        message: 'Added sucesfully',
-                        rows
-                    });
+                    uploadImage(req).then((response) => {
+                        const ids_images = []
+                        response.map((item) => {
+                            const image = {
+                                uuid: item.id.split('/')[1],
+                                product_uuid: obj.uuid,
+                                url: item.url,
+                            }
+                            conn.query('INSERT INTO images SET ?', [image], (err, rows) => {
+                                if (err) return res.status(400).send({
+                                    message: err
+                                });
+                            })
+                            ids_images.push(image.uuid)
+   
+                        })
+
+                        const objUpd = {
+                            image: ids_images.toString()
+                        }
+                        conn.query('UPDATE products SET ? WHERE uuid = ?', [objUpd, obj.uuid], (err, rows) => {
+                            if (err) return res.status(400).send({
+                                message: err
+                            });
+                        })
+                       
+
+                        return res.status(200).send({
+                            message: 'Has been added successfully',
+                            rows
+                        })
+            
+                    })
                 }); 
             } else {
                 return res.status(400).send({
@@ -110,53 +151,57 @@ const controller = {
         })
     },
 
-    uploadImages: (req,res) => {
-        req.getConnection((err, conn) => {
-            if (err) return res.status(400).send({
-                message: err
-            })
-            if(req.files){ 
-                let totalPath = ''
-                for(var i = 0; (i < req.files.image.length) && (req.files.image.length !== undefined)  ; i++) {
-                    const filePath = req.files.image[i].path; 
-                    const cut = filePath.split('\\'); 
-                    const path = cut[1]; 
-                    const cut_two = path.split('.');
-                    const ext = cut_two[1];
-                    if(ext == 'jpg' || ext == 'png' || ext == 'jpeg' || ext =='gif'){
-                        if(i === (req.files.image.length - 1)) {
-                            totalPath += path
-                            return res.status(200).send({path: totalPath , extencion: ext });
+    // uploadImages: (req,res) => {
+    //     req.getConnection((err, conn) => {
+    //         if (err) return res.status(400).send({
+    //             message: err
+    //         })
+    //         if(req.files){ 
+    //             let totalPath = ''
+    //             for(var i = 0; (i < req.files.image.length) && (req.files.image.length !== undefined)  ; i++) {
+    //                 const filePath = req.files.image[i].path; 
+    //                 const cut = filePath.split('\\'); 
+    //                 const path = cut[1]; 
+    //                 const cut_two = path.split('.');
+    //                 const ext = cut_two[1];
+    //                 if(ext == 'jpg' || ext == 'png' || ext == 'jpeg' || ext =='gif'){
+    //                     if(i === (req.files.image.length - 1)) {
+    //                         totalPath += path
+    //                         return res.status(200).send({path: totalPath , extencion: ext });
 
-                        } else {
-                            totalPath += path+','
-                        }
+    //                     } else {
+    //                         totalPath += path+','
+    //                     }
                                                 
-                    } else {
-                        fs.unlink(filePath,(err)=>{
-                             return res.status(404).send({messaje: 'Extención no valida' , err});
+    //                 } else {
+    //                     fs.unlink(filePath,(err)=>{
+    //                          return res.status(404).send({messaje: 'Extención no valida' , err});
     
-                        });
-                    }
-                }
+    //                     });
+    //                 }
+    //             }
                 
-                if (req.files.image.length === undefined ) {
-                    const filePath = req.files.image.path; 
-                    const cut = filePath.split('\\'); 
-                    const path = cut[1]; 
-                    const cut_two = path.split('.');
-                    const ext = cut_two[1];
+    //             if (req.files.image.length === undefined ) {
+    //                 const filePath = req.files.image.path; 
+    //                 const cut = filePath.split('\\'); 
+    //                 const path = cut[1]; 
+    //                 const cut_two = path.split('.');
+    //                 const ext = cut_two[1];
     
-                    if(ext == 'jpg' || ext == 'png' || ext == 'jpeg' || ext =='gif'){
-                        return res.status(200).send({path , extencion: ext });
-                    } else {
-                        fs.unlink(filePath,(err)=>{
-                          return res.status(404).send({messaje: 'Extención no valida' , err});
-                        });
-                    }
-                }
-            }
-        });
+    //                 if(ext == 'jpg' || ext == 'png' || ext == 'jpeg' || ext =='gif'){
+    //                     return res.status(200).send({path , extencion: ext });
+    //                 } else {
+    //                     fs.unlink(filePath,(err)=>{
+    //                       return res.status(404).send({messaje: 'Extención no valida' , err});
+    //                     });
+    //                 }
+    //             }
+    //         }
+    //     });
+    // },
+
+    uploadImagesToCloudinary: async (req,res) => {
+        
     },
 
     addCategory: (req,res) => {
