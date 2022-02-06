@@ -50,6 +50,23 @@ const controller = {
             })
         })
     },
+
+    getImages: (req, res) => {
+        req.getConnection((err, conn) => {
+            if (err) return res.status(400).send({
+                message: err
+            })
+
+            conn.query("SELECT * FROM images WHERE product_uuid = ? ",[req.params.uuid], (err, rows) => {
+                if (err) return res.status(400).send(err)
+                
+                return res.status(200).send({
+                    status: 'ok',
+                    rows
+                })
+            })
+        })
+    }
 }
 
 module.exports = controller;
