@@ -23,6 +23,6 @@ router.get('/getSizes', controller.getSizes);
 router.delete('/deleteSize', controller.deleteSize);
 router.put('/updateProduct/:uuid',controller.updateProduct);
 router.post('/addSale/',controller.addSale);
-router.get('/getSale/:uuid',controller.getSale);
+router.get('/getSale/:user_uuid',controller.getSale);
 
 module.exports = router
