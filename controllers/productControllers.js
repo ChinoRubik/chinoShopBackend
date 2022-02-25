@@ -200,9 +200,6 @@ const controller = {
     //     });
     // },
 
-    uploadImagesToCloudinary: async (req,res) => {
-        
-    },
 
     addCategory: (req,res) => {
         req.getConnection((err, conn) => {
@@ -429,6 +426,31 @@ const controller = {
             });
 
         });
+    },
+
+    addSale: (req, res) => {
+        req.getConnection((err, conn) => {
+            if (err) return res.status(400).send({
+                message: err
+            });
+            
+            const obj = {
+                uuid:  uuid.v4(),
+                user_uuid: req.body.user_uuid,
+                list: req.body.list,
+                total: req.body.total,
+                created_at: new Date(),
+            }
+            
+            conn.query("INSERT INTO sales SET ?",[obj],(err,rows) => {
+                if (err) return res.status(400).send({err})
+
+                return res.status(200).send({
+                    status: 'ok',
+                    rows
+                });     
+            })
+        })
     }
 }
 

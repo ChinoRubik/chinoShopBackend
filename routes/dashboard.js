@@ -22,5 +22,6 @@ router.post('/addSize', controller.addSize);
 router.get('/getSizes', controller.getSizes);
 router.delete('/deleteSize', controller.deleteSize);
 router.put('/updateProduct/:uuid',controller.updateProduct);
+router.post('/addSale/',controller.addSale);
 
 module.exports = router
