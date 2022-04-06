@@ -428,6 +428,25 @@ const controller = {
         });
     },
 
+    deleteAllCart: (req, res) => {
+        req.getConnection((err, conn) => {
+            if (err) return res.status(400).send({
+                message: err
+            });
+
+            conn.query("DELETE FROM cart WHERE user_uuid = ?",[req.params.user_uuid],(err,rows) => {
+                if (err) return res.status(400).send({err})
+
+                return res.status(200).send({
+                    status: 'ok',
+                    message: 'El carrito del usuario ha sido eliminado',
+                    rows
+                });
+            });
+
+        });
+    },
+
     addSale: (req, res) => {
         req.getConnection((err, conn) => {
             if (err) return res.status(400).send({
@@ -440,6 +459,7 @@ const controller = {
                 list: req.body.list,
                 total: req.body.total,
                 created_at: new Date(),
+                isDone: false
             }
             
             conn.query("INSERT INTO sales SET ?",[obj],(err,rows) => {
@@ -470,6 +490,132 @@ const controller = {
         });
     },
 
+    getSaleByUuid: (req,res) => {
+        req.getConnection((err, conn) => {
+            if (err) return res.status(400).send({
+                message: err
+            });
+            conn.query("SELECT * FROM sales WHERE uuid = ?",[req.params.uuid],(err,rows) => {
+                if (err) return res.status(400).send({err})
+
+                return res.status(200).send({
+                    status: 'ok',
+                    rows
+                });
+            });
+        });
+    },
+
+    updateSale: (req,res) => {
+        req.getConnection((err, conn) => {
+            if (err) return res.status(400).send({
+                message: err
+            });
+            
+            const obj = {
+                list: req.body.list,
+                total: req.body.total,
+                isDone: req.body.isDone
+            }
+            conn.query("UPDATE sales SET ? WHERE uuid = ? ",[req.body, req.params.uuid],(err,rows) => {
+                if (err) return res.status(400).send({err})
+
+                return res.status(200).send({
+                    status: 'ok',
+                    rows
+                });
+            });
+        });
+    },
+
+    deleteSale: (req,res) => {
+        req.getConnection((err, conn) => {
+            if (err) return res.status(400).send({
+                message: err
+            });
+            
+            conn.query("DELETE FROM sales WHERE uuid = ? ",[req.params.uuid],(err,rows) => {
+                if (err) return res.status(400).send({err})
+
+                return res.status(200).send({
+                    status: 'ok',
+                    rows
+                });
+            });
+        });
+    },
+
+    addAddress: (req, res) => {
+        req.getConnection((err, conn) => {
+            if (err) return res.status(400).send({
+                message: err
+            });
+            
+            const obj = {
+                uuid:  uuid.v4(),
+                sale_uuid: req.body.sale_uuid,
+                country: req.body.country,
+                city: req.body.city,
+                cp: req.body.cp,
+                number: req.body.number,
+                phone: req.body.phone,
+                street: req.body.street,
+                state: req.body.state,
+                colony: req.body.colony,
+            }
+            
+            conn.query("INSERT INTO addresses SET ?",[obj],(err,rows) => {
+                if (err) return res.status(400).send({err})
+
+                return res.status(200).send({
+                    status: 'ok',
+                    rows
+                });     
+            })
+        })
+    },
+
+    getAddress: (req,res) => {
+        req.getConnection((err, conn) => {
+            if (err) return res.status(400).send({
+                message: err
+            });
+            conn.query("SELECT * FROM addresses WHERE sale_uuid = ?",[req.params.sale_uuid],(err,rows) => {
+                if (err) return res.status(400).send({err})
+
+                return res.status(200).send({
+                    status: 'ok',
+                    rows
+                });
+            });
+        });
+    },
+
+    updateAddress: (req,res) => {
+        req.getConnection((err, conn) => {
+            if (err) return res.status(400).send({
+                message: err
+            });
+            const obj = {
+                country: req.body.country,
+                city: req.body.city,
+                cp: req.body.cp,
+                number: req.body.number,
+                phone: req.body.phone,
+                street: req.body.street,
+                state: req.body.state,
+                colony: req.body.colony,
+            }
+            conn.query("UPDATE addresses SET ? WHERE sale_uuid = ? ",[obj, req.params.sale_uuid],(err,rows) => {
+                if (err) return res.status(400).send({err})
+
+                return res.status(200).send({
+                    status: 'ok',
+                    rows
+                });
+            });
+        });
+    },
 }
 
 module.exports = controller;

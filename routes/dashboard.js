@@ -4,7 +4,8 @@ const router = require('express').Router()
 const controller = require('../controllers/productControllers')
 // const multiparty = require('connect-multiparty');
 // const dir_uploads = multiparty({uploadDir: './uploads'})
-const upload = require('../cloudinary/multer')
+const upload = require('../cloudinary/multer');
+const { Router } = require('express');
 
 router.get('/', controller.dashboard);
 // router.get('/getShirts', controller.getShirts);
@@ -24,5 +25,12 @@ router.delete('/deleteSize', controller.deleteSize);
 router.put('/updateProduct/:uuid',controller.updateProduct);
 router.post('/addSale/',controller.addSale);
 router.get('/getSale/:user_uuid',controller.getSale);
+router.get('/getSaleByUuid/:uuid',controller.getSaleByUuid);
+router.put('/updateSale/:uuid',controller.updateSale);
+router.delete('/deleteSale/:uuid',controller.deleteSale);
+router.post('/addAddress/',controller.addAddress);
+router.get('/getAddress/:sale_uuid',controller.getAddress);
+router.put('/updateAddress/:sale_uuid',controller.updateAddress);
+router.delete('/deleteAllCart/:user_uuid', controller.deleteAllCart);
 
 module.exports = router
