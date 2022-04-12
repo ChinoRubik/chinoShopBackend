@@ -32,5 +32,7 @@ router.post('/addAddress/',controller.addAddress);
 router.get('/getAddress/:sale_uuid',controller.getAddress);
 router.put('/updateAddress/:sale_uuid',controller.updateAddress);
 router.delete('/deleteAllCart/:user_uuid', controller.deleteAllCart);
+router.post('/addToFavorites', controller.addToFavorites);
+router.delete('/deleteFromFavorites/:uuid', controller.deleteFromFavorites);
 
 module.exports = router

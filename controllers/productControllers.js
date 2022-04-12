@@ -616,6 +616,46 @@ const controller = {
             });
         });
     },
+
+    addToFavorites: (req, res) => {
+        req.getConnection((err, conn) => {
+            if (err) return res.status(400).send({
+                message: err
+            });
+            
+            const obj = {
+                uuid:  uuid.v4(),
+                user_uuid: req.body.user_uuid,
+                product_uuid: req.body.product_uuid
+            }
+            
+            conn.query("INSERT INTO favorites SET ?",[obj],(err, rows) => {
+                if (err) return res.status(400).send({err})
+
+                return res.status(200).send({
+                    status: 'ok',
+                    rows
+                });     
+            });
+        });
+    },
+
+    deleteFromFavorites: (req, res) => {
+        req.getConnection((err, conn) => {
+            if (err) return res.status(400).send({
+                message: err
+            });
+            
+            conn.query("DELETE FROM favorites WHERE uuid = ?",[req.params.uuid],(err, rows) => {
+                if (err) return res.status(400).send({err})
+
+                return res.status(200).send({
+                    status: 'ok',
+                    rows
+                });     
+            });
+        });
+    }
 }
 
 module.exports = controller;
