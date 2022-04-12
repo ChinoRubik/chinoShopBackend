@@ -34,5 +34,6 @@ router.put('/updateAddress/:sale_uuid',controller.updateAddress);
 router.delete('/deleteAllCart/:user_uuid', controller.deleteAllCart);
 router.post('/addToFavorites', controller.addToFavorites);
 router.delete('/deleteFromFavorites/:uuid', controller.deleteFromFavorites);
+router.get('/getFavorites/:user_uuid',controller.getFavorites);
 
 module.exports = router

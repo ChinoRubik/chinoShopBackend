@@ -640,6 +640,22 @@ const controller = {
         });
     },
 
+    getFavorites: (req,res) => {
+        req.getConnection((err, conn) => {
+            if (err) return res.status(400).send({
+                message: err
+            });
+            conn.query("SELECT * FROM favorites WHERE user_uuid = ?", [req.params.user_uuid], (err, rows) => {
+                if (err) return res.status(400).send({err})
+
+                return res.status(200).send({
+                    status: 'ok',
+                    rows
+                });
+            });
+        });
+    },
+
     deleteFromFavorites: (req, res) => {
         req.getConnection((err, conn) => {
             if (err) return res.status(400).send({
