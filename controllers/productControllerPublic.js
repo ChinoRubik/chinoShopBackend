@@ -16,6 +16,23 @@ const controller = {
             })
         })
     },
+    
+    getProductsByCategory: (req, res) => {
+        req.getConnection((err, conn) => {
+            if (err) return res.status(400).send({
+                message: err
+            })
+
+            conn.query("SELECT * FROM products WHERE category_uuid = ?", [req.params.category_uuid], (err, rows) => {
+                if (err) return res.status(400).send(err)
+                
+                return res.status(200).send({
+                    status: 'ok',
+                    rows
+                })
+            })
+        })
+    },
 
     detailProduct: (req,res) => {
         req.getConnection((err, conn) => {
